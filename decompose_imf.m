@@ -16,15 +16,15 @@ function [best_fit_samples,best_fit_ampl,best_fit_phase]
   % in the following manner:
   %
   %   t        = ( (1:length(signal)) - 0.5 ) / length(signal)
-  %   gamma    = sum_{i=1}^N gamma_coeffs(i) * b_spline( (N-2)*t + i - 3 )
-  %   phase    = imag( gamma )
-  %   log_ampl = real( gamma )
-  %   ampl     = exp( log_ampl )
-  %   samples  = ampl * cos( phase )
+  %   gamma(gamma_coeffs) = sum_{i=1}^N gamma_coeffs(i) * b_spline( (N-2)*t + i - 3 )
+  %   phase(gamma) = imag( gamma )
+  %   log_ampl(gamma) = real( gamma )
+  %   ampl(gamma) = exp( log_ampl(gamma) )
+  %   samples(gamma) = ampl(ampl) * cos( phase(gamma) )
   %
   % The cost of this fit is given by
   %
-  %   cost = sumsq( samples - signal ) + punishing_term( gamma_coeffs )
+  %   cost(gamma_coeffs) = sumsq( samples(gamma(gamma_coeffs) - signal ) + punishing_term( gamma_coeffs )
   %
   % Here punishing_term(...) is zero, if the boundary condition for 
   % the function gamma hold true. 
@@ -60,7 +60,28 @@ function [best_fit_samples,best_fit_ampl,best_fit_phase]
   % Hence, an optimal offset can be easily found and added in every 
   % optimization step. 
   
-  % make an initial guess
+  % 1. Find an initial guess
+  % 1.1. Make an initial guess of ampl' and phase'
+  % 1.2. Calculate a matching vector gamma'
+  % 1.3. Find gamma_coeffs, such that gamma(gamma_coeffs) and
+  %      gamma'(ampl',phase') have minimal l2 distance. 
+  % 2. Distribute a swarm around the found gamma_coeffs. 
+  % 3. Subtract a constant from each member of the swarm, such that 
+  %    each swarm member has zero average. (This is for better numerical stability).
+  % 4. Find optimal values (modulo a constant offset) for gamma_coeffs
+  % 4.1. Let offset(gamma_coeffs,signal) be the function that calculates 
+  %      the optimal offset. 
+  % 4.2. Let cost_off(gamma_coeffs) be the function that calculates 
+  %      the cost of gamma_coeffs changed by an optimal offset. 
+  %      cost_off(gamma_coeffs) = 
+  %          cost(gamma_coeffs+offset(gamma_coeffs))
+  % 4.3. best_fit_gamma_coeffs_off = DE( swarm, cost_off )
+  % 5. Calculate the results
+  % 5.1. best_fit_gamma_coeffs = best_fit_gamma_coeffs_off + offset(best_fit_gamma_coeffs_off)
+  % 5.2. best_fit_
+  
+  % make an initial guess in terms of amplitude and phase function
+  % find a vector gamma_coeffs yields similiar amplitude and phase
   % distribute swarm around initial guess
   % optimize swarm with differential evolution
   % return the amplitude and phase functions of the best fit
