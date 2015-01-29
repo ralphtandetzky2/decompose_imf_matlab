@@ -36,7 +36,7 @@ function [best_fit_samples,best_fit_ampl,best_fit_phase,best_fit_gamma_coeffs]
   % The phase is changed by adding the imaginary part of that offset, 
   % the log_ampl is changed by adding the real part of the offset, 
   % hence the amplitude is changed by multiplying with exp(real(offset)). 
-  % Hence samples is changed to 
+  % Hence samples are changed to 
   %
   %   A*ampl*cos(phase) + B*ampl*sin(phase)
   %
@@ -52,7 +52,7 @@ function [best_fit_samples,best_fit_ampl,best_fit_phase,best_fit_gamma_coeffs]
   % is minimized. The value of offset can be chosen to yield any values 
   % of real A and B by putting
   %
-  %   offset = sqrt(A*A+B*B) + i*arg(A+iB)
+  %   offset = log(A-iB)
   %
   % Note also, that adding such an offset does not change the punishing_term. 
   % Hence, an optimal offset can be easily found and added in every 
