@@ -1,26 +1,24 @@
-function retval = cost( 
-
 % signal = input signal
 % N = The number of complex parameters to fit. 
-%     This must be an integer >= 3. 
+%     This must be an integer in the interval [3,length(signal)]. 
 % best_fit_samples = The samples of the first IMF fitted to the signal. 
 %     The length of this vector is equal to the length of the signal vector.
 % best_fit_ampl = The amplitude vector of the best_fit_samples.
 % best_fit_phase = The phase vector of the best_fit_samples.
 % By definition best_fit_samples equals best_fit_ampl * cos(best_fit_phase). 
-function [best_fit_samples,best_fit_ampl,best_fit_phase] 
+function [best_fit_samples,best_fit_ampl,best_fit_phase,best_fit_gamma_coeffs] 
   = decompose_imf( signal, N )
   
   % We optimize gamma_coeffs which is a complex valued vector of length N. 
   % The resulting samples, amplitude and phase function can be calculated
   % in the following manner:
   %
-  %   t        = ( (1:length(signal)) - 0.5 ) / length(signal)
-  %   gamma(gamma_coeffs) = sum_{i=1}^N gamma_coeffs(i) * b_spline( (N-2)*t + i - 3 )
-  %   phase(gamma) = imag( gamma )
-  %   log_ampl(gamma) = real( gamma )
-  %   ampl(gamma) = exp( log_ampl(gamma) )
-  %   samples(gamma) = ampl(ampl) * cos( phase(gamma) )
+  %   t                   = ( (1:length(signal)) - 0.5 ) / length(signal)
+  %   gamma(gamma_coeffs) = sum_{i=1}^N gamma_coeffs(i) * b_spline( (N-2)*t - i + 3 )
+  %   phase(gamma)        = imag( gamma )
+  %   log_ampl(gamma)     = real( gamma )
+  %   ampl(gamma)         = exp( log_ampl(gamma) )
+  %   samples(gamma)      = ampl(ampl) * cos( phase(gamma) )
   %
   % The cost of this fit is given by
   %
@@ -78,7 +76,10 @@ function [best_fit_samples,best_fit_ampl,best_fit_phase]
   % 4.3. best_fit_gamma_coeffs_off = DE( swarm, cost_off )
   % 5. Calculate the results
   % 5.1. best_fit_gamma_coeffs = best_fit_gamma_coeffs_off + offset(best_fit_gamma_coeffs_off)
-  % 5.2. best_fit_
+  % 5.2. best_fit_gamma   = gamma  (best_fit_gamma_coeffs)
+  % 5.3. best_fit_samples = samples(best_fit_gamma)
+  % 5.4. best_fit_ampl    = ampl   (best_fit_gamma)
+  % 5.5. best_fit_phase   = phase  (best_fit_gamma)
   
   % make an initial guess in terms of amplitude and phase function
   % find a vector gamma_coeffs yields similiar amplitude and phase
