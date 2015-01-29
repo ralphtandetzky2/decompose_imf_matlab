@@ -8,6 +8,6 @@ function retval = dimf_gamma( gamma_coeffs, t )
   x = (N-2)*t+3;
   retval = 0*t;
   for i = 1:N
-    retval = retval + gamma_coeffs(i) * b_spline( x - i );
+    retval = retval + gamma_coeffs(i) * dimf_b_spline( x - i );
   endfor
 endfunction
