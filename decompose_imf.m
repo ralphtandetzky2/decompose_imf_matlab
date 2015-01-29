@@ -57,7 +57,10 @@ function [best_fit_samples,best_fit_ampl,best_fit_phase,best_fit_gamma_coeffs]
   % Note also, that adding such an offset does not change the punishing_term. 
   % Hence, an optimal offset can be easily found and added in every 
   % optimization step. 
-  
+  %
+  % OUTLINE OF THE ALGORITHM
+  % %%%%%%%%%%%%%%%%%%%%%%%%
+  %
   % 1. Find an initial guess
   % 1.1. Make an initial guess of ampl' and phase'
   % 1.2. Calculate a matching vector gamma'
