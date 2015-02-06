@@ -1,6 +1,25 @@
-% The differential evolution algorithm as described on Wikipedia
+% A global optimization algorithm. 
+% The differential evolution algorithm is implemented as described in Wikipedia
 % on http://en.wikipedia.org/wiki/Differential_evolution, 29 Jan 2015. 
-function retval = differential_evolution( 
+%
+% INPUT PARAMETERS
+%
+% swarm ... A distribution of candidate solutions that will be improved.
+%           It is given in form of a matrix where each row contains a 
+%           candidate vector. The number of candidate vectors must be at 
+%           least 4. 
+% cost_func ... a function that can be applied to row vectors of swarm. 
+% n_iters ... The number of iterations for improving the swarm. 
+%             The total number of evaluations of the cost_function 
+%             is O(rows(swarm)+n_iters).
+% differential_weight ... a value in the interval (0,2].
+% crossover_probability ... a value in the interval [0,1]. 
+%
+% OUTPUT PARAMETERS
+%
+% best_fit ... The swarm row with the lower cost after n_iters iterations.
+% best_fit_cost ... The value of cost_func(best_fit_cost).   
+function [best_fit,best_fit_cost] = differential_evolution( 
     swarm, cost_func, n_iters, differential_weight, crossover_probability )
   N = rows(swarm);
   if ( N < 4 )
@@ -21,7 +40,8 @@ function retval = differential_evolution(
     c = swarm(crow,:);
     R = unidrnd(length(x));
     z = a + differential_weight * (b-c);
-    coin = discrete_rnd( [0,1], [1-crossover_probability,crossover_probability], 1, length(x) );
+    coin = discrete_rnd( [0,1], \
+      [1-crossover_probability,crossover_probability], 1, length(x) );
     y = x + coin.*(z-x);
     y(R) = z(R);
     ycost = cost_func(y);
@@ -30,6 +50,6 @@ function retval = differential_evolution(
       costs(xrow) = ycost;
     endif
   endfor
-  [min_cost,min_idx] = min(costs);
-  retval = swarm(min_idx,:);
+  [best_fit_cost,min_idx] = min(costs);
+  best_fit = swarm(min_idx,:);
 endfunction
