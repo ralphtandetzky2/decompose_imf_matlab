@@ -9,6 +9,6 @@ function retval = dimf_punishing_term( gamma_coeffs )
   d = a+b+c;
   if ( d > 0 )
       d = d + 1;
-  endif
+  end
   retval = 1.e20*d;
-endfunction
+  end

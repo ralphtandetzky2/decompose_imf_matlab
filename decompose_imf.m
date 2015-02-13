@@ -21,8 +21,9 @@
 % best_fit_phase = The phase vector of the best_fit_samples.
 %
 % By definition best_fit_samples equals best_fit_ampl * cos(best_fit_phase). 
-function [best_fit_samples,best_fit_ampl,best_fit_phase,best_fit_gamma_coeffs] \
-  = decompose_imf( signal, N, swarm_size, std_dev_log_ampl, std_dev_phase )
+function [best_fit_samples,best_fit_ampl,best_fit_phase,best_fit_gamma_coeffs] ...
+  = decompose_imf( signal, N, swarm_size, std_dev_log_ampl, std_dev_phase, ...
+                   n_iters, differential_weight, crossover_probability )
   
   % We optimize gamma_coeffs which is a complex valued vector of length N. 
   % The resulting samples, amplitude and phase function can be calculated
@@ -101,38 +102,45 @@ function [best_fit_samples,best_fit_ampl,best_fit_phase,best_fit_gamma_coeffs] \
   % IMPLEMENTATION
 
   if ( N < 3 )
-    error("The number of complex parameters to be fitted must be at least 3.");
-  endif
+    error('The number of complex parameters to be fitted must be at least 3.');
+  end
   
   % 1. Find an initial guess
   % 1.1. Make an initial guess of ampl' and phase'
   
-  [ampl,phase] = dimf_initial_guess(signal);
+  if ( N == 3 )
+    [ampl,phase] = dimf_initial_guess(signal);
+  else
+    [~,ampl,phase] = ...
+        decompose_imf( signal, floor(N/2)+1, ceil(swarm_size/2), ...
+            std_dev_log_ampl*2, std_dev_phase*2, ...
+            n_iters/2, differential_weight, crossover_probability );
+  end
   
   % 1.2. Calculate a matching vector gamma'
   
-  gamma = log(ampl) + i*phase;
+  gamma = log(ampl) + 1i*phase;
   
   % 1.3. Find gamma_coeffs, such that gamma(gamma_coeffs) and
   %      gamma'(ampl',phase') have minimal l2 distance. 
 
   t = ( (1:length(signal)) - 0.5 ) / length(signal);
-  gamma_base = [];
-  for i = 1:N
-    gamma_base = [gamma_base; dimf_b_spline( (N-2)*t - i + 3 )];
-  endfor
+  gamma_base = zeros(N,length(t));
+  for iter = 1:N
+    gamma_base(iter,:) = dimf_b_spline( (N-2)*t - iter + 3 );
+  end;
   gamma_coeffs = gamma / gamma_base;
   
   % 2. Distribute a swarm around the found gamma_coeffs. 
   
   swarm = ones(swarm_size,1) * gamma_coeffs;
-  swarm = swarm + normrnd(0,std_dev_log_ampl,rows(swarm),columns(swarm)) \
-              + i*normrnd(0,std_dev_phase   ,rows(swarm),columns(swarm));
+  swarm = swarm  + normrnd(0,std_dev_log_ampl,size(swarm)) ...
+              + 1i*normrnd(0,std_dev_phase   ,size(swarm));
   
   % 3. Subtract a constant from each member of the swarm, such that 
   %    each swarm member has zero average. (This is for better numerical stability).
   
-  swarm = swarm - mean(swarm,2) * ones(1,columns(swarm));
+  swarm = swarm - mean(swarm,2) * ones(1,size(swarm,2));
   
   % 4. Find optimal values (modulo a constant offset) for gamma_coeffs
   % 4.1. Let offset(gamma_coeffs,signal) be the function that calculates 
@@ -144,23 +152,23 @@ function [best_fit_samples,best_fit_ampl,best_fit_phase,best_fit_gamma_coeffs] \
   
   function retval = dimf_cost_off_functor( x )
     retval = dimf_cost_off( x, signal );
-  endfunction
+  end
   
   % 4.3. best_fit_gamma_coeffs_off = DE( swarm, cost_off )
   
-  best_fit_gamma_coeffs_off = differential_evolution( \
-    swarm, @dimf_cost_off_functor, n_iters, \
+  best_fit_gamma_coeffs_off = differential_evolution( ...
+    swarm, @dimf_cost_off_functor, n_iters, ...
     differential_weight, crossover_probability );
   
   % 5. Calculate the results
   % 5.1. best_fit_gamma_coeffs = best_fit_gamma_coeffs_off + offset(best_fit_gamma_coeffs_off)
   
-  best_fit_gamma_coeffs = best_fit_gamma_coeffs_off + \
-      offset(best_fit_gamma_coeffs_off,signal);
+  best_fit_gamma_coeffs = best_fit_gamma_coeffs_off + ...
+      dimf_offset(dimf_gamma(best_fit_gamma_coeffs_off,t),signal);
   
   % 5.2. best_fit_gamma   = gamma  (best_fit_gamma_coeffs)
   
-  best_fit_gamma = dimf_gamma( gamma_coeffs, t );
+  best_fit_gamma = dimf_gamma( best_fit_gamma_coeffs, t );
   
   % 5.3. best_fit_samples = samples(best_fit_gamma)
   
@@ -174,4 +182,4 @@ function [best_fit_samples,best_fit_ampl,best_fit_phase,best_fit_gamma_coeffs] \
   
   best_fit_phase = imag( best_fit_gamma );
 
-  endfunction
+end

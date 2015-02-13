@@ -3,11 +3,11 @@
 function retval = dimf_gamma( gamma_coeffs, t )
   N = length(gamma_coeffs);
   if ( N < 3 )
-    error("gamma_coeffs must contain at least three items.");
-  endif
+    error('gamma_coeffs must contain at least three items.');
+  end
   x = (N-2)*t+3;
   retval = 0*t;
-  for i = 1:N
-    retval = retval + gamma_coeffs(i) * dimf_b_spline( x - i );
-  endfor
-endfunction
+  for iter = 1:N
+    retval = retval + gamma_coeffs(iter) * dimf_b_spline( x - iter );
+  end
+end
