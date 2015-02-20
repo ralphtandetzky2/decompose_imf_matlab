@@ -1,29 +1,35 @@
-% INPUT PARAMETERS
+function [best_fit_samples,best_fit_ampl,best_fit_phase,best_fit_gamma_coeffs] ...
+  = decompose_imf( signal, N, swarm_size, std_dev_log_ampl, std_dev_phase, ...
+                   n_iters, differential_weight, crossover_probability )
+% DECOMPOSE_IMF Find an intrinsic mode function approximating a signal.
 %
-% signal = input signal
-% N = The number of complex parameters to fit. 
-%     This must be an integer in the interval [3,length(signal)]. 
-% swarm_size = The size of the swarm to be used for differential evolution.
-% std_dev_log_ampl = The standard deviation of the logarithm of the amplitide
-%                    during swarm generation.
-% std_dev_phase = The standard deviation of the phase during swarm generation.
-% n_iters = number of iterations during global optimization.
-% differential_weight = differential weight used in 
-%                       differential evolution algorithm.
+% signal                = input signal
+% N                     = The number of complex parameters to fit. 
+%                         This must be an integer in the interval 
+%                         [3,length(signal)]. 
+% swarm_size            = The size of the swarm to be used for 
+%                         differential evolution.
+% std_dev_log_ampl      = The standard deviation of the logarithm of 
+%                         the amplitide during swarm generation.
+% std_dev_phase         = The standard deviation of the phase during 
+%                         swarm generation.
+% n_iters               = number of iterations during global optimization.
+% differential_weight   = differential weight used in 
+%                         differential evolution algorithm.
 % crossover_probability = crossover probability used in 
 %                         differential evolution algorithm.
 %
 % OUTPUT PARAMETERS
 %
-% best_fit_samples = The samples of the first IMF fitted to the signal. 
-%     The length of this vector is equal to the length of the signal vector.
-% best_fit_ampl = The amplitude vector of the best_fit_samples.
-% best_fit_phase = The phase vector of the best_fit_samples.
+% best_fit_samples      = The samples of the first IMF fitted to the 
+%                         signal. The length of this vector is equal 
+%                         to the length of the signal vector.
+% best_fit_ampl         = The amplitude vector of the best_fit_samples.
+% best_fit_phase        = The phase vector of the best_fit_samples.
 %
-% By definition best_fit_samples equals best_fit_ampl * cos(best_fit_phase). 
-function [best_fit_samples,best_fit_ampl,best_fit_phase,best_fit_gamma_coeffs] ...
-  = decompose_imf( signal, N, swarm_size, std_dev_log_ampl, std_dev_phase, ...
-                   n_iters, differential_weight, crossover_probability )
+% By definition best_fit_samples equals best_fit_ampl*cos(best_fit_phase). 
+%
+% See also DIFFERENTIAL_EVOLUTION
   
   % We optimize gamma_coeffs which is a complex valued vector of length N. 
   % The resulting samples, amplitude and phase function can be calculated
