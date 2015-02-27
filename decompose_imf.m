@@ -3,6 +3,10 @@ function [best_fit_samples,best_fit_ampl,best_fit_phase,best_fit_gamma_coeffs] .
                    n_iters, differential_weight, crossover_probability )
 % DECOMPOSE_IMF Find an intrinsic mode function approximating a signal.
 %
+% [best_fit_samples,best_fit_ampl,best_fit_phase,best_fit_gamma_coeffs] ...
+%  = decompose_imf( signal, N, swarm_size, std_dev_log_ampl, std_dev_phase, ...
+%                   n_iters, differential_weight, crossover_probability )
+%
 % signal                = input signal
 % N                     = The number of complex parameters to fit. 
 %                         This must be an integer in the interval 
@@ -26,6 +30,8 @@ function [best_fit_samples,best_fit_ampl,best_fit_phase,best_fit_gamma_coeffs] .
 %                         to the length of the signal vector.
 % best_fit_ampl         = The amplitude vector of the best_fit_samples.
 % best_fit_phase        = The phase vector of the best_fit_samples.
+% best_fit_gamma_coeffs = The coefficients of the quadratic B-splines
+%                         that make up gamma. 
 %
 % By definition best_fit_samples equals best_fit_ampl*cos(best_fit_phase). 
 %
@@ -40,7 +46,7 @@ function [best_fit_samples,best_fit_ampl,best_fit_phase,best_fit_gamma_coeffs] .
   %   phase(gamma)        = imag( gamma )
   %   log_ampl(gamma)     = real( gamma )
   %   ampl(gamma)         = exp( log_ampl(gamma) )
-  %   samples(gamma)      = ampl(ampl) * cos( phase(gamma) )
+  %   samples(gamma)      = ampl(gamma) * cos( phase(gamma) )
   %
   % The cost of this fit is given by
   %
